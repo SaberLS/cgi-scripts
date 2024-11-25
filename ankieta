@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+# CGI script that creates a fill-out form
+# and echoes back its values.
+
+use CGI qw/:standard/;
+my %labels = (
+    'kobieta'   => 'kobieta',
+    'mezczyzna'   => 'mezczyzna',
+);
+
+
+print header,
+    start_html('zapisywanie do pliku'),
+    h1('zapisywanie do pliku'),
+    start_form,
+    "imie: ",textfield('name'),p,
+    "nazwisko: ",textfield('name'),p,
+    radio_group(
+            -name=>'plec',
+            -values=>['kobieta','mezczyzna'],
+            -default=>'mezczyzna',
+            -linebreak=>'true',
+            -labels=>\%labels,
+	),
+    "rok urodzenia: ",textfield('rok'),p,
+    submit,
+    end_form,
+    hr;
+
+my $str = "";
+
+if (param()) {
+    open(DATA, ">>record.txt") or die "Couldn't open file file.txt, $!";
+    $str = $str .param('name');
+    $str = $str . ":";
+    $str = $str .param('nazwisko');
+    $str = $str . ":";
+    $str = $str .param('plec');
+    $str = $str . ":";
+    $str = $str .param('rok');
+    $str = $str . "\n";
+    print DATA $str;
+}

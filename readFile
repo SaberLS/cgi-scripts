@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+local ($buffer, @pairs, $pair, $name, $value, $start, %PARAMS);
+# Read in text
+$ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
+
+if ($ENV{'REQUEST_METHOD'} eq "GET") {
+   $buffer = $ENV{'QUERY_STRING'};
+}
+
+# Split information into name/value pairs
+@pairs = split(/&/, $buffer);
+
+print "Content-type:text/html\r\n\r\n";
+foreach $pair (@pairs) {
+   ($name, $value) = split(/=/, $pair);
+   $value =~ tr/+/ /;
+   $value =~ s/%(..)/pack("C", hex($1))/eg;
+   $PARAMS{$name} = $value;
+}
+$filename = $PARAMS{filename};
+
+open(DATA, $filename) or die "Couldn't open file file.txt, $!";
+
+while(<DATA>) {
+   print "<p>$_<p>";
+}
+1;

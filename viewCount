@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+open(DATA1, "<count.txt") or die "Couldn't open file file.txt, $!";
+my $count = DATA1;
+while(<DATA1>) {
+   $count = $_ + 1;
+}
+
+print "Content-type:text/html\r\n\r\n";
+print "<p>$count<p>";
+
+open(DATA2, ">count.txt") or die "Couldn't open file file.txt, $!";
+
+print DATA2 $count;
+close( DATA1 );
+close( DATA2 );
+1;

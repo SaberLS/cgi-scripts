@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+local ($buffer, @pairs, $pair, $name, $value, $table, $month, %PARAMS);
+# Read in text
+$ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
+
+if ($ENV{'REQUEST_METHOD'} eq "GET") {
+   $buffer = $ENV{'QUERY_STRING'};
+}
+
+# Split information into name/value pairs
+@pairs = split(/&/, $buffer);
+
+foreach $pair (@pairs) {
+   ($name, $value) = split(/=/, $pair);
+   $value =~ tr/+/ /;
+   $value =~ s/%(..)/pack("C", hex($1))/eg;
+   $PARAMS{$name} = $value;
+}
+$month = $PARAMS{month};
+
+print "Content-type:text/html\r\n\r\n";
+if( $month >= 1 && $month <= 12 ) {
+  $days = 31;
+  if( $month == 2 ) {
+    $days = 28;
+  }elsif( $month == 4 || $month == 6 || $month == 9 || $month == 11 ) {
+    $days = 30;
+  }
+
+  $table = "<table><tbody><tr>";
+
+  for( $i = 1; $i <= $days; $i = $i + 1 ) {
+    $table = $table . "<td><p>$i</p></td>";
+    if($i % 7 == 0) {
+      $table = $table . "</tr><tr>"
+    }
+  }
+
+  $table = $table . "</tr></tbody></table>";
+  print $table
+}else {
+  print "<p>niepoprawny miesiac</p>"
+}
+
