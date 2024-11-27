@@ -2,11 +2,11 @@
 
 use autodie;
 use CGI qw/:standard/;
-my $query   = CGI->new;
+my $query = CGI->new;
 
 print header,
-    start_html('zapisywanie do pliku'),
-    h1('zapisywanie do pliku'),
+    start_html('zapis plikow graficznych do pliku /htdocs/upload'),
+    h1('zapis plikow graficznych do pliku /htdocs/upload'),
     start_form,
     filefield('uploaded_image'),
     submit,
@@ -15,11 +15,11 @@ print header,
 
 $upload_dir = "/home/patryk/Documents/Obsidian/vault/httpd/htdocs/upload";
 $filename = $query->param('uploaded_image');
+$filename =~ s/.*[\/\\](.*)/$1/;
 $type = $query->uploadInfo($filename)->{'Content-Type'};
-unless ($type eq 'image/jpeg') {
+unless ($type =~ /image/i) { #$type eq 'image/jpeg' || $type eq 'image/png' || $type eq 'image/svg'
     die "images ONLY!";
   }
-$filename =~ s/.*[\/\\](.*)/$1/;
 $upload_filehandle = $query->upload('uploaded_image');
   open UPLOADFILE, ">$upload_dir/$filename";
   while ( <$upload_filehandle> )
@@ -27,11 +27,26 @@ $upload_filehandle = $query->upload('uploaded_image');
     print UPLOADFILE;
   }
   close UPLOADFILE;
+
+opendir DIR, "$upload_dir" or die "Can't open $upload_dir $!";
+   @files = grep { /\.(?:jpg|png|svg|png|svg|apng|avif|gif|jpeg|jfif|pjpeg|pjp|webp)$/i } readdir DIR; #|png|svg|apng|avif|gif|jpeg|jfif|pjpeg|pjp|webp
+closedir DIR;
+
 print <<END_HTML;
 
 <DIV>
 <P>Thanks for uploading your photo!</P>
 <P>Your photo:</P>
-<img src="/upload/$filename" border="0">
+<img style="width: 400px;" src="/upload/$filename" border="0">
 </DIV>
 END_HTML
+
+
+print $query->start_html("Images in $upload_dir");
+foreach my $file (@files) {
+    print $query->div(
+      $query->img({-src=>"/upload/$file", -width=>"400px"},
+      $file)
+     );
+}
+print $query->end_html;
