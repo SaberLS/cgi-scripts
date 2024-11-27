@@ -6,37 +6,43 @@ my $query = CGI->new;
 #login:admin password:admin
 
 
-$cookie = $query->cookie('MY_COOKIE');
+$cookie = $query->cookie('SESSION');
 
 if ($cookie) {
-$cookie = $query->cookie(
-       -name=>'MY_COOKIE',
-			 -value=>'BEST_COOKIE=chocolatechip',
-			 -expires=>'+60s',
-			 -path=>'/');
+my $sid = $cookie;
+$cookie = $query->cookie(-name=>'SESSION',
+    -value=>$sid,
+    -expires=>'+60s',
+    -path=>'/',
+    -domain=>'127.0.0.1',
+    -secure=>1);
 print $query->header(-cookie=>$cookie);
 
 print start_html("Cookie");
 print <<EndOfHTML;
 <h2>Welcome!</h2>
-Your cookie is $cookie.<p>
+Your session id is $sid.<p>
 EndOfHTML
 
 } else {
-$cookie = $query->cookie(
-       -name=>'MY_COOKIE',
-			 -value=>'BEST_COOKIE=chocolatechip',
-			 -expires=>'+60s',
-			 -path=>'/');
-print $query->header(-cookie=>$cookie);
-print start_html("Cookie");
+my $sid = int(rand(1000000));
+$cookie = $query->cookie(-name=>'SESSION',
+    -value=>$sid,
+    -expires=>'+60s',
+    -path=>'/',
+    -secure=>1);
+ print $query->header(-cookie=>$cookie);
 
-print <<EndOfHTML;
-<h2>Welcome!</h2>
-There is no cookie!!<p>
-Setting up new cookie!:<p>
-$cookie<p>
-EndOfHTML
+start_html("Cookie");
+print <<EndHTML;
+<form >
+Please enter your login name and password.
+username: <input type="text" name="username" size=10><br>
+password: <input type="password" name="password" size=10><p>
+<input type="submit">
+</form>
+EndHTML
 }
+
 print end_html;
 
